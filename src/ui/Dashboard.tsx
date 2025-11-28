@@ -172,6 +172,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ args, state, pricing }) =>
             {(overallScore * 100).toFixed(2)}%
           </Text>
           <Text color="gray"> ({'\u00B1'}{(stdDev * 100).toFixed(2)}%)</Text>
+          {isRunning && (
+            <>
+              <Text color="gray"> | Last: </Text>
+              <Text color={completedExamples[completedCount - 1].score >= 0.4 ? 'green' : completedExamples[completedCount - 1].score >= 0.1 ? 'yellow' : 'red'}>
+                {(completedExamples[completedCount - 1].score * 100).toFixed(1)}%
+              </Text>
+            </>
+          )}
         </Box>
       )}
 
