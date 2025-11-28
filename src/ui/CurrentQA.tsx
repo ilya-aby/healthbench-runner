@@ -54,9 +54,9 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
 
   // Collapsed view: just final Q&A
   if (!expanded) {
-    const questionText = truncate(currentQuestion, 2, contentWidth * 2);
+    const questionText = truncate(renderMarkdown(currentQuestion), 2, contentWidth * 2);
     const answerText = currentAnswer
-      ? truncate(currentAnswer, 6, contentWidth * 6)
+      ? truncate(renderMarkdown(currentAnswer), 6, contentWidth * 6)
       : null;
 
     return (

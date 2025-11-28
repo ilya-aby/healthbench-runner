@@ -190,10 +190,11 @@ export async function runEvaluation(
       modelTimeMs += Date.now() - modelStartTime;
       modelTokens = addTokenUsage(modelTokens, modelResult.usage);
 
-      // Update state with the answer
+      // Update state with the answer and model time
       updateState(state => ({
         ...state,
         currentAnswer: modelResult.content,
+        modelTimeMs,
       }));
 
       // Grade each rubric
@@ -208,6 +209,8 @@ export async function runEvaluation(
           currentActivity: `Grading rubric ${j + 1}/${example.rubrics.length}...`,
           modelTokens,
           graderTokens,
+          modelTimeMs,
+          graderTimeMs,
         }));
 
         try {

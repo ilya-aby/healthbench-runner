@@ -4,14 +4,10 @@ import { mkdir, writeFile } from 'fs/promises';
 import { join } from 'path';
 import type { CLIArgs, RunState, ModelPricing } from '../types';
 import { createClient } from '../client';
-import { fetchModelPricing } from '../pricing';
-import { calculateCost } from '../pricing';
+import { fetchModelPricing, calculateCost } from '../pricing';
 import { runEvaluation, createInitialState } from '../runner';
 import { calculateOverallScore } from '../scorer';
-import { Header } from './Header';
-import { Progress } from './Progress';
-import { Stats } from './Stats';
-import { Summary } from './Summary';
+import { Dashboard } from './Dashboard';
 import { CurrentQA } from './CurrentQA';
 
 interface AppProps {
@@ -124,28 +120,9 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
   }
 
   return (
-    <Box flexDirection="column">
-      {/* Main row: runner box + Q&A side by side */}
-      <Box flexDirection="row" alignItems="flex-start">
-        <Box flexDirection="column" borderStyle="single" paddingX={1} width={70} flexShrink={0}>
-          <Header args={args} totalExamples={state.totalExamples} />
-          <Progress state={state} />
-          {state.phase !== 'loading' && (
-            <Stats state={state} pricing={pricing} model={args.model} grader={args.grader} />
-          )}
-        </Box>
-        <CurrentQA state={state} />
-      </Box>
-      {state.phase === 'complete' && (
-        <Summary
-          state={state}
-          pricing={pricing}
-          model={args.model}
-          grader={args.grader}
-          dataset={args.dataset}
-          reasoningEffort={args.reasoningEffort}
-        />
-      )}
+    <Box flexDirection="row" alignItems="flex-start">
+      <Dashboard args={args} state={state} pricing={pricing} />
+      <CurrentQA state={state} />
     </Box>
   );
 };
