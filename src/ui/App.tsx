@@ -120,7 +120,7 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
   }
 
   return (
-    <Box flexDirection="row" alignItems="flex-start">
+    <Box flexDirection="row" alignItems="stretch">
       <Dashboard args={args} state={state} pricing={pricing} />
       <CurrentQA state={state} />
     </Box>
