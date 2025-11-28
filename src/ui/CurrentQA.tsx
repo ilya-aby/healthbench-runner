@@ -54,14 +54,14 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
 
   // Collapsed view: just final Q&A
   if (!expanded) {
-    const questionText = truncate(renderMarkdown(currentQuestion), 2, contentWidth * 2);
+    const questionText = truncate(renderMarkdown(currentQuestion), 3, contentWidth * 3);
     const answerText = currentAnswer
-      ? truncate(renderMarkdown(currentAnswer), 6, contentWidth * 6)
+      ? truncate(renderMarkdown(currentAnswer), 10, contentWidth * 10)
       : null;
 
     return (
-      <Box flexDirection="column" width={70} marginLeft={1}>
-        <Box flexDirection="column" borderStyle="single" paddingX={1}>
+      <Box flexDirection="column" flexGrow={1} marginLeft={1}>
+        <Box flexDirection="column" borderStyle="single" paddingX={1} height="100%">
           <Text>
             <Text bold color="cyan">Current Example</Text>
             <Text color="gray" dimColor> (ctrl+o to expand)</Text>

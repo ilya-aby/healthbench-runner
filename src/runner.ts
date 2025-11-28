@@ -115,6 +115,8 @@ export function createInitialState(): RunState {
     currentPrompt: null,
     currentQuestion: null,
     currentAnswer: null,
+    lastError: null,
+    errorCount: 0,
   };
 }
 
@@ -152,6 +154,8 @@ export async function runEvaluation(
   let graderTokens = createEmptyTokenUsage();
   let modelTimeMs = 0;
   let graderTimeMs = 0;
+  let errorCount = 0;
+  let lastError: string | null = null;
   const completedExamples: ExampleResult[] = [];
   const themeScores = new Map<string, ThemeScore>();
 
@@ -281,7 +285,16 @@ export async function runEvaluation(
         lastCompletionElapsed: completionElapsed,
       }));
     } catch (e) {
-      // Error processing example
+      // Track error
+      errorCount++;
+      lastError = e instanceof Error ? e.message : String(e);
+
+      // If first example fails, it's likely a configuration issue - stop early
+      if (i === 0) {
+        throw e;
+      }
+
+      // Otherwise record as failed example
       completedExamples.push({
         prompt_id: example.prompt_id,
         model_response: '',
@@ -295,8 +308,10 @@ export async function runEvaluation(
       updateState(state => ({
         ...state,
         completedExamples: [...completedExamples],
-        currentActivity: `Error on example ${i + 1}: ${e}`,
+        currentActivity: `Error on example ${i + 1}`,
         lastCompletionElapsed: completionElapsed,
+        lastError,
+        errorCount,
       }));
     }
   }
@@ -321,6 +336,8 @@ export async function runEvaluation(
     currentPrompt: null,
     currentQuestion: null,
     currentAnswer: null,
+    lastError,
+    errorCount,
   };
 
   updateState(() => finalState);

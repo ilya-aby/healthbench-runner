@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, useApp } from 'ink';
+import { Box, Text, useApp } from 'ink';
 import { mkdir, writeFile } from 'fs/promises';
 import { join } from 'path';
 import type { CLIArgs, RunState, ModelPricing } from '../types';
@@ -35,7 +35,7 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
         const client = createClient();
         await runEvaluation(client, args, updateState);
       } catch (e) {
-        setError(String(e));
+        setError(e instanceof Error ? e.message : String(e));
       }
     };
 
@@ -57,6 +57,7 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
           const { overallScore, stdDev } = calculateOverallScore(state.completedExamples);
           const modelCost = calculateCost(state.modelTokens, args.model, pricing);
           const graderCost = calculateCost(state.graderTokens, args.grader, pricing);
+          const exampleCount = state.completedExamples.length;
           const timestamp = new Date().toISOString();
 
           // Build complete results object matching original format
@@ -66,15 +67,17 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
             grader: args.grader,
             dataset: args.dataset,
             timestamp,
-            examples_evaluated: state.completedExamples.length,
+            examples_evaluated: exampleCount,
             overall_score: overallScore,
             std_dev: stdDev,
             model_tokens: state.modelTokens,
             grader_tokens: state.graderTokens,
             model_cost: modelCost,
+            model_cost_per_example: exampleCount > 0 ? modelCost / exampleCount : 0,
             grader_cost: graderCost,
             total_cost: modelCost + graderCost,
             model_time_ms: state.modelTimeMs,
+            model_time_per_example_ms: exampleCount > 0 ? state.modelTimeMs / exampleCount : 0,
             grader_time_ms: state.graderTimeMs,
             total_time_ms: Date.now() - state.startTime.getTime(),
             example_results: state.completedExamples.map(ex => ({
@@ -88,8 +91,10 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
           };
 
           // Write timestamped results file
-          const safeTimestamp = timestamp.replace(/[:.]/g, '-');
-          const filename = `results_${args.model.replace(/\//g, '_')}_${safeTimestamp}.json`;
+          // Format: YYYY-MM-DD_HH-MM-SS_model_samples.json (for easy sorting)
+          const safeTimestamp = timestamp.slice(0, 19).replace(/[T:]/g, '-');
+          const safeModel = args.model.replace(/\//g, '_');
+          const filename = `${safeTimestamp}_${safeModel}_${state.completedExamples.length}.json`;
           await writeFile(
             join(args.output, filename),
             JSON.stringify(results, null, 2)
@@ -109,12 +114,8 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
 
   if (error) {
     return (
-      <Box flexDirection="column">
-        <Box borderStyle="single" borderColor="red" paddingX={1}>
-          <Box flexDirection="column">
-            <Box>Error: {error}</Box>
-          </Box>
-        </Box>
+      <Box borderStyle="single" borderColor="red" paddingX={1} alignSelf="flex-start">
+        <Text color="red">{error}</Text>
       </Box>
     );
   }

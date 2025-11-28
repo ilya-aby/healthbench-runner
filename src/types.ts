@@ -100,6 +100,8 @@ export interface RunState {
   currentPrompt: Message[] | null; // full conversation history for current example
   currentQuestion: string | null; // last user message from current prompt
   currentAnswer: string | null; // model's response (null while generating)
+  lastError: string | null; // most recent error message
+  errorCount: number; // total number of errors encountered
 }
 
 // Model pricing from OpenRouter
