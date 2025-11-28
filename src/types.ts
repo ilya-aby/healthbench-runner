@@ -31,7 +31,8 @@ export interface RubricResult {
 
 export interface ExampleResult {
   prompt_id: string;
-  question: string;
+  prompt: Message[]; // full conversation history
+  question: string; // last user message (for display)
   model_response: string;
   rubric_results: RubricResult[];
   achieved_points: number;

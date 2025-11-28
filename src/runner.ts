@@ -279,6 +279,7 @@ export async function runEvaluation(
 
       const exampleResult: ExampleResult = {
         prompt_id: example.prompt_id,
+        prompt: example.prompt,
         question: questionText,
         model_response: modelResult.content,
         rubric_results: rubricResults,
@@ -314,6 +315,7 @@ export async function runEvaluation(
       // Otherwise record as failed example
       completedExamples.push({
         prompt_id: example.prompt_id,
+        prompt: example.prompt,
         question: questionText,
         model_response: '',
         rubric_results: [],

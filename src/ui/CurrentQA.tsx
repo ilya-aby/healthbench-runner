@@ -145,49 +145,13 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
   }
 
   // Expanded view: full conversation history + model response
-  // For historical examples, we only have Q&A (no full prompt history)
-  if (isViewingHistory) {
-    return (
-      <Box flexDirection='column' flexGrow={1} marginLeft={1}>
-        <Box flexDirection='column' borderStyle='single' paddingX={1} height='100%'>
-          <Text>
-            <Text bold color='cyan'>
-              {headerText}
-            </Text>
-            {scorePercent !== null && (
-              <Text color={scoreColor!}> • {scorePercent}%</Text>
-            )}
-            <Text color='gray' dimColor>
-              {' '}
-              ({headerHint}, ctrl+o to collapse)
-            </Text>
-          </Text>
-
-          <Box marginTop={1}>
-            <Text>
-              <Text color='gray'>Q: </Text>
-              <Text>{renderMarkdown(viewedExample!.question)}</Text>
-            </Text>
-          </Box>
-
-          <Box marginTop={1}>
-            <Text>
-              <Text color={COLORS.model} bold>
-                A:{' '}
-              </Text>
-              <Text>{renderMarkdown(viewedExample!.model_response)}</Text>
-            </Text>
-          </Box>
-        </Box>
-      </Box>
-    );
-  }
-
   // Group messages into Q&A pairs for visual separation
+  const promptToUse = isViewingHistory ? viewedExample!.prompt : currentPrompt;
+  const answerToUse = isViewingHistory ? viewedExample!.model_response : currentAnswer;
   const messagePairs: { question?: Message; answer?: Message }[] = [];
-  if (currentPrompt) {
+  if (promptToUse) {
     let currentPair: { question?: Message; answer?: Message } = {};
-    for (const msg of currentPrompt) {
+    for (const msg of promptToUse) {
       if (msg.role === 'user') {
         if (currentPair.question) {
           messagePairs.push(currentPair);
@@ -212,6 +176,9 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
           <Text bold color='cyan'>
             {headerText}
           </Text>
+          {scorePercent !== null && (
+            <Text color={scoreColor!}> • {scorePercent}%</Text>
+          )}
           <Text color='gray' dimColor>
             {' '}
             ({headerHint}, ctrl+o to collapse)
@@ -244,8 +211,8 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
             <Text color={COLORS.model} bold>
               A:{' '}
             </Text>
-            {currentAnswer ? (
-              <Text>{renderMarkdown(currentAnswer)}</Text>
+            {answerToUse ? (
+              <Text>{renderMarkdown(answerToUse)}</Text>
             ) : (
               <Text color={COLORS.model}>Generating...</Text>
             )}
