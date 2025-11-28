@@ -1,5 +1,4 @@
 import { parseArgs } from 'util';
-import React from 'react';
 import { render } from 'ink';
 import type { CLIArgs, ReasoningEffort } from './types';
 import type { DatasetType } from './dataset';

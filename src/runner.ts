@@ -5,7 +5,6 @@ import type {
   ExampleResult,
   TokenUsage,
   ThemeScore,
-  HealthBenchExample,
   RubricResult,
 } from './types';
 import { loadDataset } from './dataset';
