@@ -200,32 +200,27 @@ export async function runEvaluation(
         modelTimeMs,
       }));
 
-      // Grade each rubric
-      const rubricResults: RubricResult[] = [];
+      // Grade all rubrics concurrently
+      updateState(state => ({
+        ...state,
+        currentRubric: 0,
+        currentActivity: `Grading ${example.rubrics.length} rubrics...`,
+        modelTokens,
+        graderTokens,
+        modelTimeMs,
+        graderTimeMs,
+      }));
 
-      for (let j = 0; j < example.rubrics.length; j++) {
-        const rubric = example.rubrics[j];
+      const graderStartTime = Date.now();
 
-        updateState(state => ({
-          ...state,
-          currentRubric: j + 1,
-          currentActivity: `Grading rubric ${j + 1}/${example.rubrics.length}...`,
-          modelTokens,
-          graderTokens,
-          modelTimeMs,
-          graderTimeMs,
-        }));
-
+      // Create grading promises for all rubrics
+      const gradingPromises = example.rubrics.map(async (rubric, j) => {
         try {
           const prompt = buildGraderPrompt(example.prompt, modelResult.content, rubric);
-          const graderStartTime = Date.now();
           const graderResult = await chatWithUsage(client, args.grader, [
             { role: 'system', content: 'You are a helpful assistant.' },
             { role: 'user', content: prompt },
           ], { temperature: 0 });
-          graderTimeMs += Date.now() - graderStartTime;
-
-          graderTokens = addTokenUsage(graderTokens, graderResult.usage);
 
           // Parse grader response
           let jsonStr = graderResult.content;
@@ -240,21 +235,39 @@ export async function runEvaluation(
 
           const parsed = JSON.parse(jsonStr) as { explanation: string; criteria_met: boolean };
 
-          rubricResults.push({
-            criterion: rubric.criterion,
-            points: rubric.points,
-            criteria_met: parsed.criteria_met,
-            explanation: parsed.explanation,
-          });
+          return {
+            index: j,
+            result: {
+              criterion: rubric.criterion,
+              points: rubric.points,
+              criteria_met: parsed.criteria_met,
+              explanation: parsed.explanation,
+            } as RubricResult,
+            usage: graderResult.usage,
+          };
         } catch (e) {
-          // Default to not met on error
-          rubricResults.push({
-            criterion: rubric.criterion,
-            points: rubric.points,
-            criteria_met: false,
-            explanation: `Grading error: ${e}`,
-          });
+          return {
+            index: j,
+            result: {
+              criterion: rubric.criterion,
+              points: rubric.points,
+              criteria_met: false,
+              explanation: `Grading error: ${e}`,
+            } as RubricResult,
+            usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+          };
         }
+      });
+
+      // Wait for all grading to complete
+      const gradingResults = await Promise.all(gradingPromises);
+      graderTimeMs += Date.now() - graderStartTime;
+
+      // Aggregate results in original order
+      const rubricResults: RubricResult[] = new Array(example.rubrics.length);
+      for (const gr of gradingResults) {
+        rubricResults[gr.index] = gr.result;
+        graderTokens = addTokenUsage(graderTokens, gr.usage);
       }
 
       // Calculate score

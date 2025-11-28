@@ -186,9 +186,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ args, state, pricing }) =>
           </Box>
           <Box>
             <Text color='gray'>
-              {state.currentRubric === 0
-                ? `Generating response for example ${state.currentExample}...`
-                : `Grading rubric ${state.currentRubric}/${state.totalRubrics} for example ${state.currentExample}`}
+              {state.currentActivity}
             </Text>
           </Box>
         </Box>
