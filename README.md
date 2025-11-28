@@ -17,7 +17,8 @@ A terminal UI for evaluating LLMs on [OpenAI's HealthBench](https://github.com/o
 bun install
 ```
 
-Set your OpenRouter API key:
+- Get an OpenRouter API key. You can use OpenRouter BYOK to link an existing OAI/Anthropic/etc API key to bill usage against those accounts instead of OpenRouter
+- Set your OpenRouter API key in env:
 
 ```bash
 export OPENROUTER_API_KEY=your-key-here
