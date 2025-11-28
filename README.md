@@ -1,3 +1,6 @@
+
+<img width="3380" height="1840" alt="CleanShot 2025-11-28 at 16 07 31@2x" src="https://github.com/user-attachments/assets/7004301f-045f-401a-b321-fe5a1ac448f1" />
+
 # HealthBench Runner
 
 A terminal UI for evaluating LLMs on [OpenAI's HealthBench](https://github.com/openai/simple-evals) medical reasoning benchmark.
