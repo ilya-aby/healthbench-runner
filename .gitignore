@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Results
+results/
+
+# Data
+data/
+
+# Environment
+.env
+.env.local
+
+# Bun
+bun.lockb
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code
+.claude/
