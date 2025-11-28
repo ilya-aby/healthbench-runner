@@ -279,6 +279,7 @@ export async function runEvaluation(
 
       const exampleResult: ExampleResult = {
         prompt_id: example.prompt_id,
+        question: questionText,
         model_response: modelResult.content,
         rubric_results: rubricResults,
         achieved_points: achievedPoints,
@@ -313,6 +314,7 @@ export async function runEvaluation(
       // Otherwise record as failed example
       completedExamples.push({
         prompt_id: example.prompt_id,
+        question: questionText,
         model_response: '',
         rubric_results: [],
         achieved_points: 0,

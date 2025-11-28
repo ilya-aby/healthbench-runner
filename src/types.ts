@@ -31,6 +31,7 @@ export interface RubricResult {
 
 export interface ExampleResult {
   prompt_id: string;
+  question: string;
   model_response: string;
   rubric_results: RubricResult[];
   achieved_points: number;

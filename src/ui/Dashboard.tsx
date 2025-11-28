@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { calculateCost, formatCost, formatCostPrecise } from '../pricing';
 import { calculateOverallScore, getSortedThemeScores, THEME_NAMES } from '../scorer';
 import type { CLIArgs, ModelPricing, RunState } from '../types';
-import { COLORS } from './colors';
+import { COLORS, getScoreColor } from './colors';
 
 interface DashboardProps {
   args: CLIArgs;
@@ -203,10 +203,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ args, state, pricing }) =>
           <Text bold>{isComplete ? 'Overall' : 'Running'} Score: </Text>
           {completedCount > 0 ? (
             <>
-              <Text
-                bold
-                color={overallScore >= 0.4 ? 'green' : overallScore >= 0.1 ? 'yellow' : 'red'}
-              >
+              <Text bold color={getScoreColor(overallScore)}>
                 {(overallScore * 100).toFixed(2)}%
               </Text>
               <Text color='gray'>
@@ -217,15 +214,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ args, state, pricing }) =>
               {isRunning && (
                 <>
                   <Text color='gray'> | Last: </Text>
-                  <Text
-                    color={
-                      completedExamples[completedCount - 1].score >= 0.4
-                        ? 'green'
-                        : completedExamples[completedCount - 1].score >= 0.1
-                        ? 'yellow'
-                        : 'red'
-                    }
-                  >
+                  <Text color={getScoreColor(completedExamples[completedCount - 1].score)}>
                     {(completedExamples[completedCount - 1].score * 100).toFixed(1)}%
                   </Text>
                 </>
@@ -245,9 +234,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ args, state, pricing }) =>
             <Box key={theme.theme}>
               <Text color='gray'> </Text>
               <Text>{(THEME_NAMES[theme.theme] || theme.theme).padEnd(34)}</Text>
-              <Text
-                color={theme.avgScore >= 0.4 ? 'green' : theme.avgScore >= 0.1 ? 'yellow' : 'red'}
-              >
+              <Text color={getScoreColor(theme.avgScore)}>
                 {(theme.avgScore * 100).toFixed(1).padStart(7)}%
               </Text>
               <Text color='gray'> ({theme.examples})</Text>

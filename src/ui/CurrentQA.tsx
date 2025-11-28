@@ -1,7 +1,7 @@
 import { Box, Text, useInput } from 'ink';
 import React, { useState } from 'react';
 import type { Message, RunState } from '../types';
-import { COLORS } from './colors';
+import { COLORS, getScoreColor } from './colors';
 
 interface CurrentQAProps {
   state: RunState;
@@ -35,13 +35,42 @@ function renderMarkdown(text: string): string {
 }
 
 export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) => {
-  const { currentPrompt, currentQuestion, currentAnswer, phase } = state;
+  const { currentPrompt, currentQuestion, currentAnswer, phase, completedExamples } = state;
   const [expanded, setExpanded] = useState(false);
+  const [viewingIndex, setViewingIndex] = useState<number | null>(null); // null = current
 
-  // Handle ctrl+o to toggle expanded view
+  // Handle keyboard navigation
   useInput((input, key) => {
     if (key.ctrl && input === 'o') {
       setExpanded((e) => !e);
+    }
+
+    // Arrow keys to browse completed examples
+    if (key.leftArrow && completedExamples.length > 0) {
+      setViewingIndex((prev) => {
+        if (prev === null) {
+          // From current, go to last completed
+          return completedExamples.length - 1;
+        }
+        // Go to previous, or stay at first
+        return Math.max(0, prev - 1);
+      });
+    }
+
+    if (key.rightArrow && completedExamples.length > 0) {
+      setViewingIndex((prev) => {
+        if (prev === null) return null; // Already at current
+        if (prev >= completedExamples.length - 1) {
+          // At last completed, go to current
+          return null;
+        }
+        return prev + 1;
+      });
+    }
+
+    // 'c' to return to current
+    if (input === 'c') {
+      setViewingIndex(null);
     }
   });
 
@@ -54,23 +83,42 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
   // Expanded: fill remaining screen width
   const contentWidth = 70 - 6; // account for border + padding + "Q: "/"A: " prefix
 
+  // Determine what to display: historical example or current
+  const isViewingHistory = viewingIndex !== null && viewingIndex < completedExamples.length;
+  const viewedExample = isViewingHistory ? completedExamples[viewingIndex] : null;
+
+  // Build header text based on viewing mode
+  const headerText = isViewingHistory
+    ? `Example ${viewingIndex + 1}/${completedExamples.length}`
+    : 'Current Example';
+  const headerHint = isViewingHistory ? '←→ browse, c=current' : '←→ browse';
+  const scorePercent = isViewingHistory ? Math.round(viewedExample!.score * 100) : null;
+  const scoreColor = isViewingHistory ? getScoreColor(viewedExample!.score) : null;
+
   // Collapsed view: just final Q&A
   if (!expanded) {
-    const questionText = truncate(renderMarkdown(currentQuestion), 3, contentWidth * 3);
-    const answerText = currentAnswer
-      ? truncate(renderMarkdown(currentAnswer), 10, contentWidth * 10)
-      : null;
+    const questionText = isViewingHistory
+      ? truncate(renderMarkdown(viewedExample!.question), 3, contentWidth * 3)
+      : truncate(renderMarkdown(currentQuestion), 3, contentWidth * 3);
+    const answerText = isViewingHistory
+      ? truncate(renderMarkdown(viewedExample!.model_response), 10, contentWidth * 10)
+      : currentAnswer
+        ? truncate(renderMarkdown(currentAnswer), 10, contentWidth * 10)
+        : null;
 
     return (
       <Box flexDirection='column' flexGrow={1} marginLeft={1}>
         <Box flexDirection='column' borderStyle='single' paddingX={1} height='100%'>
           <Text>
             <Text bold color='cyan'>
-              Current Example
+              {headerText}
             </Text>
+            {scorePercent !== null && (
+              <Text color={scoreColor!}> • {scorePercent}%</Text>
+            )}
             <Text color='gray' dimColor>
               {' '}
-              (ctrl+o to expand)
+              ({headerHint}, ctrl+o to expand)
             </Text>
           </Text>
 
@@ -97,6 +145,44 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
   }
 
   // Expanded view: full conversation history + model response
+  // For historical examples, we only have Q&A (no full prompt history)
+  if (isViewingHistory) {
+    return (
+      <Box flexDirection='column' flexGrow={1} marginLeft={1}>
+        <Box flexDirection='column' borderStyle='single' paddingX={1} height='100%'>
+          <Text>
+            <Text bold color='cyan'>
+              {headerText}
+            </Text>
+            {scorePercent !== null && (
+              <Text color={scoreColor!}> • {scorePercent}%</Text>
+            )}
+            <Text color='gray' dimColor>
+              {' '}
+              ({headerHint}, ctrl+o to collapse)
+            </Text>
+          </Text>
+
+          <Box marginTop={1}>
+            <Text>
+              <Text color='gray'>Q: </Text>
+              <Text>{renderMarkdown(viewedExample!.question)}</Text>
+            </Text>
+          </Box>
+
+          <Box marginTop={1}>
+            <Text>
+              <Text color={COLORS.model} bold>
+                A:{' '}
+              </Text>
+              <Text>{renderMarkdown(viewedExample!.model_response)}</Text>
+            </Text>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
   // Group messages into Q&A pairs for visual separation
   const messagePairs: { question?: Message; answer?: Message }[] = [];
   if (currentPrompt) {
@@ -124,11 +210,11 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
       <Box flexDirection='column' borderStyle='single' paddingX={1} height='100%'>
         <Text>
           <Text bold color='cyan'>
-            Current Example
+            {headerText}
           </Text>
           <Text color='gray' dimColor>
             {' '}
-            (ctrl+o to collapse)
+            ({headerHint}, ctrl+o to collapse)
           </Text>
         </Text>
 

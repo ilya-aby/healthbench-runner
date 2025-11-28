@@ -5,3 +5,10 @@ export const COLORS = {
   header: 'cyan', // Section headers
   label: 'gray', // Labels and secondary text
 } as const;
+
+// Score color based on HealthBench typical ranges
+export function getScoreColor(score: number): string {
+  if (score >= 0.4) return 'green';
+  if (score >= 0.1) return 'yellow';
+  return 'red';
+}
