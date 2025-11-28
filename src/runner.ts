@@ -221,15 +221,10 @@ export async function runEvaluation(
       const gradingPromises = example.rubrics.map(async (rubric, j) => {
         try {
           const prompt = buildGraderPrompt(example.prompt, modelResult.content, rubric);
-          const graderResult = await chatWithUsage(
-            client,
-            args.grader,
-            [
-              { role: 'system', content: 'You are a helpful assistant.' },
-              { role: 'user', content: prompt },
-            ],
-            { temperature: 0 }
-          );
+          const graderResult = await chatWithUsage(client, args.grader, [
+            { role: 'system', content: 'You are a helpful assistant.' },
+            { role: 'user', content: prompt },
+          ]);
 
           // Parse grader response
           let jsonStr = graderResult.content;

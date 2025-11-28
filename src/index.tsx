@@ -15,7 +15,6 @@ function parseCliArgs(): CLIArgs {
       dataset: { type: 'string', short: 'd', default: 'main' },
       grader: { type: 'string', short: 'g', default: DEFAULT_GRADER },
       output: { type: 'string', short: 'o', default: 'results' },
-      concurrency: { type: 'string', short: 'c', default: '1' },
       'reasoning-effort': { type: 'string', short: 'r' },
       help: { type: 'boolean', short: 'h' },
     },
@@ -36,7 +35,6 @@ Options:
   -d, --dataset     Dataset variant: main, hard, consensus (default: main)
   -g, --grader      Grader model (default: ${DEFAULT_GRADER})
   -o, --output      Output directory (default: results)
-  -c, --concurrency Concurrent grading requests (default: 1)
   -r, --reasoning-effort  Reasoning effort for reasoning models (GPT-5.1, o3, etc.)
                     Values: none, minimal, low, medium, high
   -h, --help        Show this help message
@@ -66,7 +64,6 @@ Known HealthBench Scores (for validation):
     dataset: ((values.dataset as string) || 'main') as DatasetType,
     grader: (values.grader as string) || DEFAULT_GRADER,
     output: (values.output as string) || 'results',
-    concurrency: parseInt((values.concurrency as string) || '1', 10),
     reasoningEffort: values['reasoning-effort'] as ReasoningEffort | undefined,
   };
 }

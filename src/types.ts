@@ -56,7 +56,6 @@ export interface CLIArgs {
   dataset: 'main' | 'hard' | 'consensus';
   grader: string;
   output: string;
-  concurrency: number;
   reasoningEffort?: ReasoningEffort;
 }
 

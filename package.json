@@ -1,5 +1,5 @@
 {
-  "name": "healthbench-test",
+  "name": "healthbench-runner",
   "module": "index.ts",
   "type": "module",
   "private": true,
