@@ -23,14 +23,13 @@ export async function chat(
   client: OpenAI,
   model: string,
   messages: Message[],
-  options?: { temperature?: number; maxTokens?: number }
+  options?: { temperature?: number }
 ): Promise<string> {
   try {
     const response = await client.chat.completions.create({
       model,
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
       temperature: options?.temperature ?? 1.0,
-      max_tokens: options?.maxTokens ?? 4096,
     });
 
     // Check for errors in the response
@@ -70,51 +69,45 @@ export async function chatWithUsage(
   client: OpenAI,
   model: string,
   messages: Message[],
-  options?: { temperature?: number; maxTokens?: number; reasoningEffort?: ReasoningEffort }
+  options?: { temperature?: number; reasoningEffort?: ReasoningEffort }
 ): Promise<ChatResponse> {
-  try {
-    // Build request body
-    const requestBody: Record<string, unknown> = {
-      model,
-      messages: messages.map((m) => ({ role: m.role, content: m.content })),
-      temperature: options?.temperature ?? 1.0,
-      max_tokens: options?.maxTokens ?? 4096,
+  // Build request body
+  const requestBody: Record<string, unknown> = {
+    model,
+    messages: messages.map((m) => ({ role: m.role, content: m.content })),
+    temperature: options?.temperature ?? 1.0,
+  };
+
+  // OpenRouter uses nested reasoning object for reasoning models
+  if (options?.reasoningEffort) {
+    requestBody.reasoning = {
+      effort: options.reasoningEffort,
     };
-
-    // OpenRouter uses nested reasoning object for reasoning models
-    if (options?.reasoningEffort) {
-      requestBody.reasoning = {
-        effort: options.reasoningEffort,
-      };
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await client.chat.completions.create(requestBody as any);
-
-    // Check for errors in the response
-    if (!response) {
-      throw new Error('API returned null response');
-    }
-    const anyResponse = response as unknown as { error?: { message?: string; code?: string } };
-    if (anyResponse?.error) {
-      throw new Error(anyResponse.error.message || 'Unknown API error');
-    }
-
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('Empty response from API');
-    }
-
-    // Extract token usage
-    const usage: TokenUsage = {
-      promptTokens: response.usage?.prompt_tokens ?? 0,
-      completionTokens: response.usage?.completion_tokens ?? 0,
-      totalTokens: response.usage?.total_tokens ?? 0,
-    };
-
-    return { content, usage };
-  } catch (e: unknown) {
-    const error = e as Error & { status?: number; message?: string; response?: unknown };
-    throw new Error(`API error: ${error.message || e}`);
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const response = await client.chat.completions.create(requestBody as any);
+
+  // Check for errors in the response
+  if (!response) {
+    throw new Error('API returned null response');
+  }
+  const anyResponse = response as unknown as { error?: { message?: string; code?: string } };
+  if (anyResponse?.error) {
+    throw new Error(anyResponse.error.message || 'Unknown API error');
+  }
+
+  const content = response.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error('Empty response from API');
+  }
+
+  // Extract token usage
+  const usage: TokenUsage = {
+    promptTokens: response.usage?.prompt_tokens ?? 0,
+    completionTokens: response.usage?.completion_tokens ?? 0,
+    totalTokens: response.usage?.total_tokens ?? 0,
+  };
+
+  return { content, usage };
 }
