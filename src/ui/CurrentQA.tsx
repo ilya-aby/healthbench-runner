@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
-import type { RunState, Message } from '../types';
+import React, { useState } from 'react';
+import type { Message, RunState } from '../types';
 import { COLORS } from './colors';
 
 interface CurrentQAProps {
@@ -20,16 +20,18 @@ function truncate(text: string, maxLines: number, maxChars: number): string {
 
 // Simple markdown renderer for common LLM output patterns
 function renderMarkdown(text: string): string {
-  return text
-    // Headers: ### Header -> just the text (no special formatting in string)
-    .replace(/^#{1,6}\s+/gm, '')
-    // Bullet points: - item or * item -> • item
-    .replace(/^(\s*)[-*]\s+/gm, '$1• ')
-    // Remove bold markers (can't style inline in a string)
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    // Collapse multiple blank lines into one
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  return (
+    text
+      // Headers: ### Header -> just the text (no special formatting in string)
+      .replace(/^#{1,6}\s+/gm, '')
+      // Bullet points: - item or * item -> • item
+      .replace(/^(\s*)[-*]\s+/gm, '$1• ')
+      // Remove bold markers (can't style inline in a string)
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      // Collapse multiple blank lines into one
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+  );
 }
 
 export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) => {
@@ -39,7 +41,7 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
   // Handle ctrl+o to toggle expanded view
   useInput((input, key) => {
     if (key.ctrl && input === 'o') {
-      setExpanded(e => !e);
+      setExpanded((e) => !e);
     }
   });
 
@@ -60,16 +62,21 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
       : null;
 
     return (
-      <Box flexDirection="column" flexGrow={1} marginLeft={1}>
-        <Box flexDirection="column" borderStyle="single" paddingX={1} height="100%">
+      <Box flexDirection='column' flexGrow={1} marginLeft={1}>
+        <Box flexDirection='column' borderStyle='single' paddingX={1} height='100%'>
           <Text>
-            <Text bold color="cyan">Current Example</Text>
-            <Text color="gray" dimColor> (ctrl+o to expand)</Text>
+            <Text bold color='cyan'>
+              Current Example
+            </Text>
+            <Text color='gray' dimColor>
+              {' '}
+              (ctrl+o to expand)
+            </Text>
           </Text>
 
           <Box marginTop={1}>
             <Text>
-              <Text color="gray">Q: </Text>
+              <Text color='gray'>Q: </Text>
               <Text>{questionText}</Text>
             </Text>
           </Box>
@@ -113,26 +120,31 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
   }
 
   return (
-    <Box flexDirection="column" flexGrow={1} marginLeft={1}>
-      <Box flexDirection="column" borderStyle="single" paddingX={1}>
+    <Box flexDirection='column' flexGrow={1} marginLeft={1}>
+      <Box flexDirection='column' borderStyle='single' paddingX={1}>
         <Text>
-          <Text bold color="cyan">Current Example</Text>
-          <Text color="gray" dimColor> (ctrl+o to collapse)</Text>
+          <Text bold color='cyan'>
+            Current Example
+          </Text>
+          <Text color='gray' dimColor>
+            {' '}
+            (ctrl+o to collapse)
+          </Text>
         </Text>
 
         {/* Full conversation history grouped by Q&A pairs */}
         {messagePairs.map((pair, idx) => (
-          <Box key={idx} flexDirection="column" marginTop={1}>
+          <Box key={idx} flexDirection='column' marginTop={1}>
             {pair.question && (
               <Text>
-                <Text color="gray">Q: </Text>
+                <Text color='gray'>Q: </Text>
                 <Text>{renderMarkdown(pair.question.content)}</Text>
               </Text>
             )}
             {pair.answer && (
               <Box marginTop={0}>
                 <Text>
-                  <Text color="gray">A: </Text>
+                  <Text color='gray'>A: </Text>
                   <Text>{renderMarkdown(pair.answer.content)}</Text>
                 </Text>
               </Box>
@@ -143,7 +155,9 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
         {/* Model's response (the actual answer being generated/graded) */}
         <Box marginTop={1}>
           <Text>
-            <Text color={COLORS.model} bold>A: </Text>
+            <Text color={COLORS.model} bold>
+              A:{' '}
+            </Text>
             {currentAnswer ? (
               <Text>{renderMarkdown(currentAnswer)}</Text>
             ) : (

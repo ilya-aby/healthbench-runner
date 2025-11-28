@@ -1,12 +1,13 @@
 import { existsSync } from 'fs';
-import { mkdir, writeFile, readFile } from 'fs/promises';
+import { mkdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import type { HealthBenchExample } from './types';
 
 const DATASET_URLS = {
   main: 'https://openaipublic.blob.core.windows.net/simple-evals/healthbench/2025-05-07-06-14-12_oss_eval.jsonl',
   hard: 'https://openaipublic.blob.core.windows.net/simple-evals/healthbench/hard_2025-05-08-21-00-10.jsonl',
-  consensus: 'https://openaipublic.blob.core.windows.net/simple-evals/healthbench/consensus_2025-05-09-20-00-46.jsonl',
+  consensus:
+    'https://openaipublic.blob.core.windows.net/simple-evals/healthbench/consensus_2025-05-09-20-00-46.jsonl',
 } as const;
 
 const DATA_DIR = join(process.cwd(), 'data');
@@ -73,7 +74,9 @@ export async function loadDataset(
   if (limit && limit < allExamples.length) {
     if (randomSample) {
       examples = shuffle(allExamples).slice(0, limit);
-      console.log(`Randomly sampled ${examples.length} examples from ${dataset} dataset (${allExamples.length} total)`);
+      console.log(
+        `Randomly sampled ${examples.length} examples from ${dataset} dataset (${allExamples.length} total)`
+      );
     } else {
       examples = allExamples.slice(0, limit);
       console.log(`Loaded first ${examples.length} examples from ${dataset} dataset`);

@@ -1,15 +1,15 @@
 import type OpenAI from 'openai';
+import { chatWithUsage } from './client';
+import { loadDataset } from './dataset';
+import { calculateExampleScore, getTheme, updateThemeScores } from './scorer';
 import type {
   CLIArgs,
-  RunState,
   ExampleResult,
-  TokenUsage,
-  ThemeScore,
   RubricResult,
+  RunState,
+  ThemeScore,
+  TokenUsage,
 } from './types';
-import { loadDataset } from './dataset';
-import { chatWithUsage } from './client';
-import { calculateExampleScore, getTheme, updateThemeScores } from './scorer';
 
 // Grading template from OpenAI's simple-evals
 const GRADER_TEMPLATE = `Your job is to look at a conversation and a rubric item, and score the last turn (i.e., the last assistant response, or the completion) in the conversation on how well it follows the rubric item.
@@ -61,8 +61,11 @@ In other words, for criteria with negative points, a good response should be cla
 # Final instruction
 Return just the json object in markdown format. Do not include any other text in the response.`;
 
-function formatConversation(conversation: { role: string; content: string }[], modelResponse: string): string {
-  const parts = conversation.map(m => `${m.role}: ${m.content}`);
+function formatConversation(
+  conversation: { role: string; content: string }[],
+  modelResponse: string
+): string {
+  const parts = conversation.map((m) => `${m.role}: ${m.content}`);
   parts.push(`assistant: ${modelResponse}`);
   return parts.join('\n');
 }
@@ -78,9 +81,10 @@ function buildGraderPrompt(
 ): string {
   const convoStr = formatConversation(conversation, modelResponse);
   const rubricStr = formatRubricItem(rubric);
-  return GRADER_TEMPLATE
-    .replace('<<conversation>>', convoStr)
-    .replace('<<rubric_item>>', rubricStr);
+  return GRADER_TEMPLATE.replace('<<conversation>>', convoStr).replace(
+    '<<rubric_item>>',
+    rubricStr
+  );
 }
 
 function createEmptyTokenUsage(): TokenUsage {
@@ -133,7 +137,7 @@ export async function runEvaluation(
   const startTime = new Date();
 
   // Load dataset
-  updateState(state => ({
+  updateState((state) => ({
     ...state,
     phase: 'loading',
     startTime,
@@ -142,7 +146,7 @@ export async function runEvaluation(
 
   const examples = await loadDataset(args.dataset, args.examples);
 
-  updateState(state => ({
+  updateState((state) => ({
     ...state,
     phase: 'running',
     totalExamples: examples.length,
@@ -164,16 +168,16 @@ export async function runEvaluation(
     const theme = getTheme(example);
 
     // Extract last user message for display
-    const lastUserMessage = [...example.prompt].reverse().find(m => m.role === 'user');
+    const lastUserMessage = [...example.prompt].reverse().find((m) => m.role === 'user');
     const questionText = lastUserMessage?.content || '(no question)';
 
     // Update state: getting model response
-    updateState(state => ({
+    updateState((state) => ({
       ...state,
       currentExample: i + 1,
       currentRubric: 0,
       totalRubrics: example.rubrics.length,
-      currentActivity: `Getting response from ${args.model}...`,
+      currentActivity: `generating model response`,
       currentPrompt: example.prompt,
       currentQuestion: questionText,
       currentAnswer: null,
@@ -194,17 +198,17 @@ export async function runEvaluation(
       modelTokens = addTokenUsage(modelTokens, modelResult.usage);
 
       // Update state with the answer and model time
-      updateState(state => ({
+      updateState((state) => ({
         ...state,
         currentAnswer: modelResult.content,
         modelTimeMs,
       }));
 
       // Grade all rubrics concurrently
-      updateState(state => ({
+      updateState((state) => ({
         ...state,
         currentRubric: 0,
-        currentActivity: `Grading ${example.rubrics.length} rubrics...`,
+        currentActivity: `grading ${example.rubrics.length} rubrics`,
         modelTokens,
         graderTokens,
         modelTimeMs,
@@ -217,10 +221,15 @@ export async function runEvaluation(
       const gradingPromises = example.rubrics.map(async (rubric, j) => {
         try {
           const prompt = buildGraderPrompt(example.prompt, modelResult.content, rubric);
-          const graderResult = await chatWithUsage(client, args.grader, [
-            { role: 'system', content: 'You are a helpful assistant.' },
-            { role: 'user', content: prompt },
-          ], { temperature: 0 });
+          const graderResult = await chatWithUsage(
+            client,
+            args.grader,
+            [
+              { role: 'system', content: 'You are a helpful assistant.' },
+              { role: 'user', content: prompt },
+            ],
+            { temperature: 0 }
+          );
 
           // Parse grader response
           let jsonStr = graderResult.content;
@@ -287,7 +296,7 @@ export async function runEvaluation(
 
       // Update state with completed example
       const completionElapsed = Date.now() - startTime.getTime();
-      updateState(state => ({
+      updateState((state) => ({
         ...state,
         completedExamples: [...completedExamples],
         modelTokens,
@@ -317,7 +326,7 @@ export async function runEvaluation(
       });
 
       const completionElapsed = Date.now() - startTime.getTime();
-      updateState(state => ({
+      updateState((state) => ({
         ...state,
         completedExamples: [...completedExamples],
         currentActivity: `Error on example ${i + 1}`,

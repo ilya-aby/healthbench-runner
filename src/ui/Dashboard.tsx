@@ -84,7 +84,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ args, state, pricing }) =>
   const totalCost = modelCost + graderCost;
 
   return (
-    <Box flexDirection='column' borderStyle='single' paddingX={1} width={70} flexShrink={0} alignSelf='flex-start'>
+    <Box
+      flexDirection='column'
+      borderStyle='single'
+      paddingX={1}
+      width={70}
+      flexShrink={0}
+      alignSelf='flex-start'
+    >
       {/* Header */}
       <Text bold color='cyan'>
         HealthBench Runner
@@ -185,9 +192,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ args, state, pricing }) =>
             )}
           </Box>
           <Box>
-            <Text color='gray'>
-              {state.currentActivity}
-            </Text>
+            <Text color='gray'>Status: {state.currentActivity}</Text>
           </Box>
         </Box>
       )}

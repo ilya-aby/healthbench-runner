@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import type { Message, ChatResponse, TokenUsage, ReasoningEffort } from './types';
+import type { ChatResponse, Message, ReasoningEffort, TokenUsage } from './types';
 
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
@@ -28,7 +28,7 @@ export async function chat(
   try {
     const response = await client.chat.completions.create({
       model,
-      messages: messages.map(m => ({ role: m.role, content: m.content })),
+      messages: messages.map((m) => ({ role: m.role, content: m.content })),
       temperature: options?.temperature ?? 1.0,
       max_tokens: options?.maxTokens ?? 4096,
     });
@@ -76,7 +76,7 @@ export async function chatWithUsage(
     // Build request body
     const requestBody: Record<string, unknown> = {
       model,
-      messages: messages.map(m => ({ role: m.role, content: m.content })),
+      messages: messages.map((m) => ({ role: m.role, content: m.content })),
       temperature: options?.temperature ?? 1.0,
       max_tokens: options?.maxTokens ?? 4096,
     };

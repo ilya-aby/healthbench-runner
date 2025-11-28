@@ -93,8 +93,8 @@ export interface RunState {
   completedExamples: ExampleResult[];
   modelTokens: TokenUsage;
   graderTokens: TokenUsage;
-  modelTimeMs: number;   // total time spent on model calls
-  graderTimeMs: number;  // total time spent on grader calls
+  modelTimeMs: number; // total time spent on model calls
+  graderTimeMs: number; // total time spent on grader calls
   themeScores: Map<string, ThemeScore>;
   lastCompletionElapsed: number; // ms elapsed when last example completed (for ETA calc)
   currentPrompt: Message[] | null; // full conversation history for current example
@@ -106,7 +106,7 @@ export interface RunState {
 
 // Model pricing from OpenRouter
 export interface ModelPricing {
-  prompt: number;   // cost per token
+  prompt: number; // cost per token
   completion: number; // cost per token
 }
 

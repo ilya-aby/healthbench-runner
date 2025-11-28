@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, Text, useApp } from 'ink';
 import { mkdir, writeFile } from 'fs/promises';
+import { Box, Text, useApp } from 'ink';
 import { join } from 'path';
-import type { CLIArgs, RunState, ModelPricing } from '../types';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createClient } from '../client';
-import { fetchModelPricing, calculateCost } from '../pricing';
-import { runEvaluation, createInitialState } from '../runner';
+import { calculateCost, fetchModelPricing } from '../pricing';
+import { createInitialState, runEvaluation } from '../runner';
 import { calculateOverallScore } from '../scorer';
-import { Dashboard } from './Dashboard';
+import type { CLIArgs, ModelPricing, RunState } from '../types';
 import { CurrentQA } from './CurrentQA';
+import { Dashboard } from './Dashboard';
 
 interface AppProps {
   args: CLIArgs;
@@ -80,7 +80,7 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
             model_time_per_example_ms: exampleCount > 0 ? state.modelTimeMs / exampleCount : 0,
             grader_time_ms: state.graderTimeMs,
             total_time_ms: Date.now() - state.startTime.getTime(),
-            example_results: state.completedExamples.map(ex => ({
+            example_results: state.completedExamples.map((ex) => ({
               prompt_id: ex.prompt_id,
               model_response: ex.model_response,
               rubric_results: ex.rubric_results,
@@ -95,10 +95,7 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
           const safeTimestamp = timestamp.slice(0, 19).replace(/[T:]/g, '-');
           const safeModel = args.model.replace(/\//g, '_');
           const filename = `${safeTimestamp}_${safeModel}_${state.completedExamples.length}.json`;
-          await writeFile(
-            join(args.output, filename),
-            JSON.stringify(results, null, 2)
-          );
+          await writeFile(join(args.output, filename), JSON.stringify(results, null, 2));
 
           console.log(`\nResults written to ${args.output}/${filename}`);
         } catch (e) {
@@ -114,14 +111,14 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
 
   if (error) {
     return (
-      <Box borderStyle="single" borderColor="red" paddingX={1} alignSelf="flex-start">
-        <Text color="red">{error}</Text>
+      <Box borderStyle='single' borderColor='red' paddingX={1} alignSelf='flex-start'>
+        <Text color='red'>{error}</Text>
       </Box>
     );
   }
 
   return (
-    <Box flexDirection="row" alignItems="stretch">
+    <Box flexDirection='row' alignItems='stretch'>
       <Dashboard args={args} state={state} pricing={pricing} />
       <CurrentQA state={state} />
     </Box>
