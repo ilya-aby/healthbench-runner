@@ -83,7 +83,7 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
 
           <Box marginTop={1}>
             <Text>
-              <Text color={COLORS.model}>A: </Text>
+              <Text color={COLORS.model} bold>A: </Text>
               {answerText ? (
                 <Text>{answerText}</Text>
               ) : (
@@ -121,7 +121,7 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
 
   return (
     <Box flexDirection='column' flexGrow={1} marginLeft={1}>
-      <Box flexDirection='column' borderStyle='single' paddingX={1}>
+      <Box flexDirection='column' borderStyle='single' paddingX={1} height='100%'>
         <Text>
           <Text bold color='cyan'>
             Current Example

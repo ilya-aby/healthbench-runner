@@ -118,9 +118,19 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
   }
 
   return (
-    <Box flexDirection='row' alignItems='stretch'>
-      <Dashboard args={args} state={state} pricing={pricing} />
-      <CurrentQA state={state} />
+    <Box flexDirection='column'>
+      <Box flexDirection='row' alignItems='stretch'>
+        <Dashboard args={args} state={state} pricing={pricing} />
+        <CurrentQA state={state} />
+      </Box>
+      {/* Error display */}
+      {state.errorCount > 0 && (
+        <Box marginTop={0}>
+          <Text color='red'>
+            {state.errorCount} error{state.errorCount > 1 ? 's' : ''}. Last error: {state.lastError}
+          </Text>
+        </Box>
+      )}
     </Box>
   );
 };

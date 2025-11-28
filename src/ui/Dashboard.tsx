@@ -256,14 +256,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ args, state, pricing }) =>
         </Box>
       )}
 
-      {/* Error display */}
-      {state.errorCount > 0 && (
-        <Box marginTop={1}>
-          <Text color='red'>
-            {state.errorCount} error{state.errorCount > 1 ? 's' : ''}. Last error: {state.lastError}
-          </Text>
-        </Box>
-      )}
     </Box>
   );
 };
