@@ -108,7 +108,7 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
 
     return (
       <Box flexDirection='column' flexGrow={1} marginLeft={1}>
-        <Box flexDirection='column' borderStyle='single' paddingX={1} height='100%'>
+        <Box flexDirection='column' borderStyle='round' borderColor='cyan' paddingX={1} height='100%'>
           <Text>
             <Text bold color='cyan'>
               {headerText}
@@ -171,7 +171,7 @@ export const CurrentQA: React.FC<CurrentQAProps> = ({ state }: CurrentQAProps) =
 
   return (
     <Box flexDirection='column' flexGrow={1} marginLeft={1}>
-      <Box flexDirection='column' borderStyle='single' paddingX={1} height='100%'>
+      <Box flexDirection='column' borderStyle='round' borderColor='cyan' paddingX={1} height='100%'>
         <Text>
           <Text bold color='cyan'>
             {headerText}

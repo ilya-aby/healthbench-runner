@@ -86,7 +86,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ args, state, pricing }) =>
   return (
     <Box
       flexDirection='column'
-      borderStyle='single'
+      borderStyle='round'
+      borderColor='cyan'
       paddingX={1}
       width={70}
       flexShrink={0}
