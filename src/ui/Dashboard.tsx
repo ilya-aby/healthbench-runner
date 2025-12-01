@@ -1,4 +1,5 @@
 import { Box, Text } from 'ink';
+import Spinner from 'ink-spinner';
 import React, { useEffect, useState } from 'react';
 import { calculateCost, formatCost, formatCostPrecise } from '../pricing';
 import { calculateOverallScore, getSortedThemeScores, THEME_NAMES } from '../scorer';
@@ -35,12 +36,12 @@ function formatPerExample(ms: number): string {
   return `${seconds.toFixed(1)}s`;
 }
 
-function ProgressBar({ value, width = 25 }: { value: number; width?: number }) {
+function ProgressBar({ value, width = 35 }: { value: number; width?: number }) {
   const filled = Math.round(value * width);
   const empty = width - filled;
   return (
     <Text>
-      <Text color='green'>{'█'.repeat(filled)}</Text>
+      <Text color='cyan'>{'█'.repeat(filled)}</Text>
       <Text color='gray'>{'░'.repeat(empty)}</Text>
     </Text>
   );
@@ -178,11 +179,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ args, state, pricing }) =>
       {isRunning && (
         <Box flexDirection='column' marginTop={1}>
           <Box>
-            <Text color='gray'>Progress: </Text>
-            <Text>[</Text>
             <ProgressBar value={progress} />
             <Text>
-              ] {completedCount}/{totalExamples} ({(progress * 100).toFixed(0)}%)
+              {' '}{completedCount}/{totalExamples}
             </Text>
             {completedCount > 0 && (
               <>
@@ -193,7 +192,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ args, state, pricing }) =>
             )}
           </Box>
           <Box>
-            <Text color='gray'>Status: {state.currentActivity}</Text>
+            <Text color={state.currentActivity.includes('generating') ? COLORS.model : COLORS.grader}>
+              <Spinner />
+            </Text>
+            <Text color='gray'>
+              {' '}{state.currentActivity.includes('generating') ? 'Generating...' : 'Grading...'}
+            </Text>
           </Box>
         </Box>
       )}

@@ -1,3 +1,4 @@
+import { Alert, StatusMessage } from '@inkjs/ui';
 import { mkdir, writeFile } from 'fs/promises';
 import { Box, Text, useApp } from 'ink';
 import { join } from 'path';
@@ -19,6 +20,7 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
   const [state, setState] = useState<RunState>(createInitialState());
   const [pricing, setPricing] = useState<Map<string, ModelPricing>>(new Map());
   const [error, setError] = useState<string | null>(null);
+  const [resultsFile, setResultsFile] = useState<string | null>(null);
 
   const updateState = useCallback((updater: (prev: RunState) => RunState) => {
     setState((prev: RunState) => updater(prev));
@@ -95,11 +97,11 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
           const safeTimestamp = timestamp.slice(0, 19).replace(/[T:]/g, '-');
           const safeModel = args.model.replace(/\//g, '_');
           const filename = `${safeTimestamp}_${safeModel}_${state.completedExamples.length}.json`;
-          await writeFile(join(args.output, filename), JSON.stringify(results, null, 2));
-
-          console.log(`\nResults written to ${args.output}/${filename}`);
-        } catch (e) {
-          console.error('Failed to write results:', e);
+          const fullPath = join(args.output, filename);
+          await writeFile(fullPath, JSON.stringify(results, null, 2));
+          setResultsFile(fullPath);
+        } catch {
+          // Error writing results - silently fail, errors shown via StatusMessage
         }
 
         setTimeout(() => exit(), 500);
@@ -111,8 +113,8 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
 
   if (error) {
     return (
-      <Box borderStyle='single' borderColor='red' paddingX={1} alignSelf='flex-start'>
-        <Text color='red'>{error}</Text>
+      <Box alignSelf="flex-start">
+        <Alert variant="error" title="Error">{error}</Alert>
       </Box>
     );
   }
@@ -123,13 +125,15 @@ export const App: React.FC<AppProps> = ({ args }: AppProps) => {
         <Dashboard args={args} state={state} pricing={pricing} />
         <CurrentQA state={state} />
       </Box>
+      {/* Results file display */}
+      {resultsFile && (
+        <Text>Results: {resultsFile}</Text>
+      )}
       {/* Error display */}
       {state.errorCount > 0 && (
-        <Box marginTop={0}>
-          <Text color='red'>
-            {state.errorCount} error{state.errorCount > 1 ? 's' : ''}. Last error: {state.lastError}
-          </Text>
-        </Box>
+        <StatusMessage variant="error">
+          {state.errorCount} error{state.errorCount > 1 ? 's' : ''}. Last: {state.lastError}
+        </StatusMessage>
       )}
     </Box>
   );
